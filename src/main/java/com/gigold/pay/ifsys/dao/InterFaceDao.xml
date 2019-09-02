@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gigold.pay.ifsys.dao.InterFaceDao">
+
+	<resultMap type="com.gigold.pay.ifsys.bo.InterFaceInfo" id="ifResultMap">
+		<id property="id" column="ID" />
+		<result property="ifName" column="IF_NAME" />
+		<result property="ifDesc" column="IF_DESC" />
+		<result property="uid" column="IF_CREATEBY" />
+		<result property="ifCreateBy" column="IF_CREATEBY" />
+		<result property="ifCreateTime" column="IF_CREATETIME" />
+		<result property="ifSysId" column="IF_SYS_ID" />
+		<result property="ifProId" column="IF_PRO_ID" />
+		<result property="ifStatus" column="IF_STATUS" />
+		<result property="ifUrl" column="IF_URL" />
+		<result property="ifType" column="IF_TYPE" />
+		<result property="ifProtocol" column="IF_PROTOCOL" />
+		<result property="isValid" column="ISVALID" />
+		<result property="method" column="IF_METHOD" />
+		<result property="methodVersion" column="IF_DUBBO_VERSION" />
+		<result property="isIdempotent" column="IS_IDEMPOTENT" />
+		<result property="ifVersionNo" column="IF_VERSION_NO" />
+		<result property="pid" column="PID" />
+
+		<result property="designName" column="DS_NAME" />
+		<result property="designName" column="USERNAME" />
+		<result property="sysName" column="SYS_NAME" />
+		<result property="proName" column="PRO_NAME" />
+		<result property="returnType" column="IF_RETURN_TYPE" />
+		<result property="ifUrl" column="IF_URL" />
+		<result property="inAutoTest" column="AUTO_TEST" />
+	</resultMap>
+
+	<resultMap type="com.gigold.pay.ifsys.bo.InterFaceInfo" id="joinResultMap">
+		<id property="id" column="ID" />
+		<result property="ifName" column="IF_NAME" />
+		<result property="ifDesc" column="IF_DESC" />
+		<result property="uid" column="IF_CREATEBY" />
+		<result property="ifSysId" column="IF_SYS_ID" />
+		<result property="ifProId" column="IF_PRO_ID" />
+		<result property="sysName" column="IF_SYS_NAME" />
+		<result property="proName" column="IF_PRO_NAME" />
+		<result property="designName" column="USERNAME" />
+		<result property="ifUrl" column="IF_FULL_URL" />
+		<result property="isIdempotent" column="IS_IDEMPOTENT" />
+
+	</resultMap>
+
+	<resultMap type="HashMap" id="HashMap">
+		<id property="id" column="ID" />
+		<result property="caseName" column="CASE_NAME" />
+		<result property="testResult" column="TEST_RESULT" />
+	</resultMap>
+
+	<!--获取接口下的所有用例id名字信息-->
+	<select id="getInterfaceMocksById" resultMap="HashMap">
+		select
+			au.ID,
+			au.CASE_NAME,
+			ar.TEST_RESULT TEST_RESULT
+		from
+			T_IF_AUTO_MOCK au left join T_IF_AUTO_MOCK_RESULT ar on ar.MOCK_ID = au.id
+		where
+			IF_ID=#{ifId}
+			and STATUS='Y'
+	</select>
+
+	<!-- 分页获取接口基本信息 列表页 -->
+	<select id="getAllIfSys" resultMap="ifResultMap" parameterType="com.gigold.pay.ifsys.bo.InterFaceInfo">
+		select
+		concat(PRO.address_url,if_url) IF_FULL_URL,
+		if_url IF_URL,
+		if_desc IF_DESC,
+		if_type IF_TYPE,
+		inteFace.ID,
+		inteFace.IF_CREATETIME,
+		inteFace.IS_IDEMPOTENT,
+		IF_NAME,
+		IF_SYS_NAME SYS_NAME,
+		inteFace.IF_SYS_ID,
+		inteFace.IF_PRO_ID,
+		inteFace.IF_CREATEBY,
+		IF_PRO_NAME PRO_NAME,
+		AUTO_TEST,
+		USERNAME
+		from T_IF_INTERFACE inteFace
+		left join T_IF_SYSTEM sys on inteFace.IF_SYS_ID=sys.ID
+		left join T_IF_PRO PRO on inteFace.IF_PRO_ID=PRO.ID
+		left join T_IF_USER user on
+		inteFace.IF_CREATEBY=user.ID
+		where (inteFace.IF_NAME like '%${ifName}%'
+		or inteFace.IF_DESC like '%${ifName}%'
+		or IF_SYS_NAME like '%${ifName}%'
+		or inteFace.ID like '%${ifName}%'
+		or IF_PRO_NAME like '%${ifName}%'
+		or inteFace.IF_URL like '%${ifName}%'
+		or USERNAME like '%${ifName}%' )
+		and sys.IF_PROJECT_ID=#{pid}
+		and inteFace.ISVALID='Y'
+
+		and inteFace.IF_SYS_ID not in (0,2)
+
+		<if test="ifSysId != null and ifSysId!=0">
+			and inteFace.IF_SYS_ID = #{ifSysId}
+		</if>
+		<if test="ifProId != null and ifProId!=0">
+			and inteFace.IF_PRO_ID = #{ifProId}
+		</if>
+		<if test="ifCreateBy != null and ifCreateBy!=0">
+			and inteFace.IF_CREATEBY = #{ifCreateBy}
+		</if>
+		order by inteFace.IF_CREATETIME desc
+	</select>
+
+
+	<!-- 分页获取接口基本信息 列表页 -->
+	<select id="getFollowedInterfaces" resultMap="ifResultMap" parameterType="int">
+		select
+			*,(select iu.USERNAME from T_IF_USER iu where iu.id=ii.IF_CREATEBY) USERNAME
+		from
+			(select distinct(iv.IF_FOLLOWED_ID),iv.TM_FOLLOW from T_IF_INVOKER iv where iv.U_ID=#{uId} and iv.STATUS='Y') ivv left join T_IF_INTERFACE ii
+		on
+			ii.ID = ivv.IF_FOLLOWED_ID
+		WHERE
+			ii.ISVALID='Y'
+		<if test="ifSysId != null and ifSysId!=0">
+			and ii.IF_SYS_ID=#{ifSysId}
+		</if>
+		<if test="ifProId != null and ifProId!=0">
+			and ii.IF_PRO_ID=#{ifProId}
+		</if>
+		order by
+			ivv.TM_FOLLOW desc
+	</select>
+
+
+	<!-- 分页获取接口基本信息 列表页 -->
+	<select id="getCreatedInterfaces" resultMap="ifResultMap" parameterType="int">
+		select
+			*,(select iu.USERNAME from T_IF_USER iu where iu.id=ii.IF_CREATEBY) USERNAME
+		from
+			T_IF_INTERFACE ii
+		WHERE
+			ii.ISVALID='Y'
+			and ii.IF_CREATEBY=#{uId}
+		<if test="ifSysId != null and ifSysId!=0">
+			and ii.IF_SYS_ID=#{ifSysId}
+		</if>
+		<if test="ifProId != null and ifProId!=0">
+			and ii.IF_PRO_ID=#{ifProId}
+		</if>
+	</select>
+
+	<select id="getInterFaceById" parameterType="com.gigold.pay.ifsys.bo.InterFaceInfo"
+		resultMap="ifResultMap">
+        <![CDATA[  
+        select
+        *,
+        (select iu.USERNAME from T_IF_USER iu where iu.ID = ii.IF_CREATEBY) DS_NAME,
+        (select iy.IF_SYS_NAME from T_IF_SYSTEM iy where iy.ID = ii.IF_SYS_ID) SYS_NAME,
+        (select ip.IF_PRO_NAME from T_IF_PRO ip where ip.ID = ii.IF_PRO_ID) PRO_NAME,
+		(select iy.IF_PROJECT_ID from T_IF_SYSTEM iy where iy.ID = ii.IF_SYS_ID) PID
+        from T_IF_INTERFACE ii
+        where ID=#{id} and ISVALID='Y'
+        ]]>
+	</select>
+
+	<select id="getInterfaceByProId" parameterType="int" resultMap="ifResultMap">
+        <![CDATA[  
+        select
+        *
+        from T_IF_INTERFACE
+        where IF_PRO_ID=#{ifProId} and ISVALID='Y'
+        ]]>
+	</select>
+
+	<select id="getInterfaceByUrl" resultMap="ifResultMap">
+        <![CDATA[
+       		select
+       			*
+       		from
+       			`T_IF_INTERFACE`
+       		where
+       			IF_PRO_ID=#{pro}
+       			and IF_URL=#{url}
+       			and ISVALID="Y"
+       			LIMIT 1
+        ]]>
+	</select>
+
+
+	<select id="getAllInterFaceByPage" resultMap="joinResultMap">
+        <![CDATA[  
+         select
+        inteFace.ID,
+        IF_NAME,
+        IF_DESC,
+        IF_CREATEBY,
+        inteFace.IF_SYS_ID,
+        inteFace.IS_IDEMPOTENT,
+        IF_SYS_NAME,
+        IF_PRO_ID,
+        IF_PRO_NAME,
+        USERNAME
+        from T_IF_INTERFACE inteFace 
+        left join T_IF_SYSTEM  sys on inteFace.IF_SYS_ID=sys.ID
+        left join T_IF_PRO  PRO on inteFace.IF_PRO_ID=PRO.ID
+        left join T_IF_USER  user on inteFace.IF_CREATEBY=user.ID
+        where inteFace.ISVALID='Y'
+        ]]>
+	</select>
+	<!-- 模糊查询 -->
+	<select id="queryInterFaceByPage" parameterType="com.gigold.pay.ifsys.bo.InterFaceInfo"
+		resultMap="joinResultMap">
+		select
+		inteFace.ID,
+		IF_NAME,
+		IF_DESC,
+		IF_CREATEBY,
+		inteFace.IF_SYS_ID,
+		IF_SYS_NAME,
+		IF_PRO_ID,
+		IF_PRO_NAME,
+		USERNAME
+		from T_IF_INTERFACE inteFace
+		left join T_IF_SYSTEM sys on inteFace.IF_SYS_ID=sys.ID
+		left join
+		T_IF_PRO PRO on inteFace.IF_PRO_ID=PRO.ID
+		left join T_IF_USER user on
+		inteFace.IF_CREATEBY=user.ID
+		where (inteFace.IF_NAME like '%${ifName}%'
+		or inteFace.IF_DESC like '%${ifName}%'
+		or IF_SYS_NAME like
+		'%${ifName}%'
+		or IF_PRO_NAME like '%${ifName}%'
+		or USERNAME like
+		'%${ifName}%' )
+		and inteFace.ISVALID='Y'
+		<if test="ifSysId != null and ifSysId!=0">
+			and inteFace.IF_SYS_ID = #{ifSysId}
+		</if>
+		<if test="ifProId != null and ifProId!=0">
+			and inteFace.IF_PRO_ID = #{ifProId}
+		</if>
+	</select>
+
+	<insert id="addInterFace" parameterType="com.gigold.pay.ifsys.bo.InterFaceInfo"
+		useGeneratedKeys="true" keyProperty="id">
+        <![CDATA[  
+        insert into
+        T_IF_INTERFACE(
+        IF_NAME,IF_DESC,
+        IF_CREATEBY,
+        IF_CREATETIME,
+        IF_SYS_ID,
+        IF_PRO_ID,
+        IF_STATUS,
+        IF_URL,
+        IF_TYPE,
+        IF_PROTOCOL,
+        IF_DUBBO_VERSION,
+        IS_IDEMPOTENT,
+        IF_METHOD
+        )
+        values(
+        #{ifName},
+        #{ifDesc},
+        #{ifCreateBy},
+        #{ifCreateTime},
+        #{ifSysId},
+        #{ifProId},
+        #{ifStatus},
+        #{ifUrl},
+        #{ifType},
+        #{ifProtocol},
+        #{methodVersion},
+        #{isIdempotent},
+        #{method}
+        )
+    ]]>
+	</insert>
+
+	<delete id="deleteInterFaceById" parameterType="com.gigold.pay.ifsys.bo.InterFaceInfo">
+        <![CDATA[  
+        update
+        T_IF_INTERFACE
+        set ISVALID='N'
+        where ID=#{id}
+        ]]>
+	</delete>
+
+	<!-- 根据IF_ID删除模拟数据 -->
+	<update id="deleteMockByIfId" parameterType="int">
+		update
+		T_IF_AUTO_MOCK
+		set STATUS='N'
+		where IF_ID =#{ifId}
+	</update>
+
+	<!-- 根据IF_ID删除mock的依赖关系 -->
+	<update id="deleteMockReferByIfId" parameterType="int">
+		update
+		T_IF_REFER
+		set STATUS='N'
+		where REFER_MOCK_ID in (select ta.id from T_IF_AUTO_MOCK ta where ta.if_id=#{ifId})
+		or
+		MOCK_ID in (select ta.id from T_IF_AUTO_MOCK ta where ta.if_id=#{ifId})
+	</update>
+
+	<update id="updateInterFace" parameterType="com.gigold.pay.ifsys.bo.InterFaceInfo">
+		update T_IF_INTERFACE
+		<set>
+		<if test="ifName!=null and ifName!=''">
+			IF_NAME=#{ifName},
+		</if>
+		<if test="ifVersionNo!=null and ifVersionNo!=''">
+			IF_VERSION_NO=#{ifVersionNo},
+		</if>
+		<if test="ifDesc!=null and ifDesc!=''">
+			IF_DESC=#{ifDesc},
+		</if>
+		<if test="ifProId!=null and ifProId!=''">
+			IF_PRO_ID=#{ifProId},
+		</if>
+		<if test="ifSysId!=null and ifSysId!=''">
+			IF_SYS_ID=#{ifSysId},
+		</if>
+		<if test="ifType!=null and ifType!=''">
+			IF_TYPE=#{ifType},
+		</if>
+		<if test="ifProtocol!=null and ifProtocol!=''">
+			IF_PROTOCOL=#{ifProtocol},
+		</if>
+		<if test="ifUrl!=null and ifUrl!=''">
+			IF_URL=#{ifUrl},
+		</if>
+		<if test="isIdempotent!=null and isIdempotent!=''">
+			IS_IDEMPOTENT=#{isIdempotent},
+		</if>
+		<if test="methodVersion!=null and methodVersion!=''">
+			IF_DUBBO_VERSION=#{methodVersion},
+		</if>
+		<if test="method!=null and method!=''">
+			IF_METHOD=#{method},
+		</if>
+		<if test="returnType!=null and returnType!=''">
+			IF_RETURN_TYPE=#{returnType},
+		</if>
+		</set>
+		where ID=#{id}
+	</update>
+
+
+
+</mapper>
+ 
+ 
+ 
+ 
+ 
+ 

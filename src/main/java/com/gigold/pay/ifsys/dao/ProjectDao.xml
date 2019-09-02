@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gigold.pay.ifsys.dao.ProjectDao">
+
+
+	<resultMap type="com.gigold.pay.ifsys.bo.ProjectInfo" id="projectInfo">
+		<id property="id" column="ID" />
+		<result property="projectName" column="PROJ_NAME" />
+		<result property="projectDesc" column="PROJ_DESC" />
+		<result property="masterId" column="MASTER_ID" />
+		<result property="creatorId" column="CREATE_BY" />
+		<result property="state" column="STAT" />
+		<result property="asRole" column="ROLE" />
+		<result property="ts" column="TS" />
+	</resultMap>
+
+	<resultMap type="com.gigold.pay.ifsys.bo.Member" id="userResultMap">
+		<id property="id" column="ID" />
+		<result property="email" column="EMAIL" />
+		<result property="userName" column="USERNAME" />
+		<result property="phone" column="PHONE" />
+		<result property="qq" column="QQ" />
+		<result property="position" column="POSITION" />
+		<result property="avtSrc" column="AVT_SRC" />
+		<result property="role" column="ROLE" />
+	</resultMap>
+
+
+	<select id="getProjectByUser" parameterType="int" resultMap="projectInfo">
+		SELECT p.id,
+			p.PROJ_NAME,
+			p.PROJ_DESC,
+			p.MASTER_ID,
+			m.ROLE,
+			m.STAT,
+			p.TS
+		FROM
+			T_IF_PROJECT_MEMBER m LEFT JOIN T_IF_PROJECT p ON m.PID=p.id
+		WHERE
+			m.MID=#{userId}
+		ORDER BY
+			m.TS DESC
+	</select>
+
+	<select id="getProjectMembers" parameterType="com.gigold.pay.ifsys.bo.ProjectInfo" resultMap="userResultMap">
+		SELECT
+		  u.id,u.EMAIL,u.USERNAME,u.PHONE,u.QQ,u.POSITION,u.AVT_SRC,m.ROLE
+		FROM
+			T_IF_PROJECT_MEMBER m LEFT JOIN T_IF_USER u on m.MID=u.id
+		WHERE
+			m.PID=#{id}
+		ORDER BY
+			m.TS DESC
+	</select>
+
+	<insert id="addMembersToProject">
+		replace into T_IF_CHANGES
+		SET mid=#{userId},pid=#{pid},role=#{role},stat=1
+	</insert>
+</mapper>
+ 
+ 
+ 
+ 
+ 
+ 

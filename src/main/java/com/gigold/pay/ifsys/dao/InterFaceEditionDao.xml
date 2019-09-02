@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gigold.pay.ifsys.dao.InterFaceEditionDao">
+
+	<resultMap type="com.gigold.pay.ifsys.bo.InterFaceEdition" id="ifEdition">
+		<result property="ifId" column="IF_ID" />
+		<result property="ifVerNo" column="IF_VER_NO" />
+		<result property="ifVerDetail" column="IF_VER_DETAIL" />
+		<result property="status" column="STATUS" />
+		<result property="userId" column="USER_ID" />
+		<result property="userName" column="USER_NAME" />
+		<result property="ts" column="TS" />
+	</resultMap>
+
+	<update id="saveEdition" parameterType="com.gigold.pay.ifsys.bo.InterFaceEdition">
+		REPLACE
+			T_IF_EDITIONS
+		set
+			IF_VER_DETAIL=#{ifVerDetail},
+			IF_ID=#{ifId},
+			IF_VER_NO=#{ifVerNo},
+			USER_ID = #{userId}
+	</update>
+
+	<select id="getIfEditionByVerNo" parameterType="com.gigold.pay.ifsys.bo.InterFaceEdition"
+			resultMap="ifEdition">
+		<![CDATA[
+			select
+				*
+			from
+				T_IF_EDITIONS
+			where
+				IF_ID=#{ifId}
+				and IF_VER_NO=#{ifVerNo}
+				and STATUS="Y"
+				limit 1
+		]]>
+	</select>
+
+	<select id="getEditionsByIfId" parameterType="int"
+			resultMap="ifEdition">
+		<![CDATA[
+			select
+				*,
+				(select USERNAME from T_IF_USER u where u.id=USER_ID )USER_NAME
+			from
+				T_IF_EDITIONS
+			where
+				IF_ID=#{ifId}
+				and STATUS="Y"
+				order by TS DESC
+			limit 100
+
+		]]>
+	</select>
+
+</mapper>
+ 
+ 
+ 
+ 
+ 
+ 

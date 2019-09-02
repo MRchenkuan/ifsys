@@ -1,0 +1,116 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <style>
+    .ifsystitle{
+        height: 50px;
+        text-align: center;
+        line-height: 50px;
+        font-size: 24px;
+        color: #25AEB3;
+    }
+    .content{
+        padding: 20px;
+        background: #f6f3fb;
+        font-size: 22px;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .mailBox{
+        background: #fff;
+        color: #666;
+        border: 1px solid gainsboro;
+        width: 80%;
+        margin: 0 auto;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .body{
+        background-color: #f6f3fb;
+        font-family: monospace;
+        width:100%;
+        height: 100%;
+        padding: 20px 0;
+    }
+    .wish{
+        text-align: right;
+        padding-right: 20%;
+        color: #666666;
+    }
+    .remark{
+        padding: 10px 20px;
+        background: #f6f3fb;
+        border-radius: 5px;
+        word-break: break-word;
+    }
+    .check{
+        font-size: 14px;
+        margin: 20px 0;
+        display: block;
+        color: #25aeb8;
+    }
+    .type{
+        padding:0 1px;
+        color: #fff;
+        border-radius: 5px;
+    }
+    .changes{
+        font-size: 14px;
+    }
+    .change_detail{
+        text-align: center;
+    }
+    .default{
+        background: #25aeb3;
+        border: 1px solid rgb(30, 140, 144);
+    }
+    .warning{
+        background: #d86060;
+        border: 1px solid #b14f4f;
+    }
+    .invokerList{
+        font-size: 14px;
+        color: #795548;
+        margin: 5px;
+        float: left;
+    }
+    </style>
+</head>
+<body style='width:100%'>
+<div class="body">
+    <p class="ifsystitle">独孤九剑系统</p>
+    <div class="mailBox">
+        <p>你好，<strong>${reciverName}</strong>:<p>
+        <p>你关注的接口发生了变更</p>
+        <p class="content">
+            接口名：${ifName}<br>
+            设计者：${ifDsName}<br>
+            API地址：${ifUrl}<br>
+            所在系统：【${ifsys}】&raquo;【${ifpro}】<br>
+        </p>
+        <div class="content">
+        #foreach($ifChange in $ifChangesList)
+                #set($style = 'default')
+                #if($ifChange.getOptionType()=="删除")
+                    #set($style = 'warning')
+                #end
+            <div class="changes">
+                <p class="change_title"><strong>$operName</strong> <span class="type $style">$ifChange.getOptionType()</span> $ifChange.getChangeType()</p>
+                #if($ifChange.getPrmVal() && $ifChange.getNowVal())
+                    <p class="change_detail">$ifChange.getPrmVal() &rarr; $ifChange.getNowVal()</p>
+                #end
+            </div>
+        #end
+        </div>
+        <a class="content check" href="http://123.57.152.75:8051/ifsys/new/main.html?ifId=${ifId}">查看接口</a>
+        <p class="content">
+            <a class="invokerList">关注者：</a>
+            #foreach($invoker in $invokerList)
+                <a class="invokerList">$invoker.getUserName()</a>
+            #end
+        </p>
+    </div>
+    <p class="wish">祝工作愉快!</p>
+</div>
+</body>
+</html>

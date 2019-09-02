@@ -1,0 +1,49 @@
+body{font-family: monospace,"Helvetica Neue",Helvetica,Arial,sans-serif,monospace;}
+.right{position: absolute;right:0;}
+.top{position: absolute;top:0}
+.left{position: absolute;left:0;}
+.bottom{position: absolute;bottom: 0;}
+#information{position:fixed;top:0;right: 0;left: 0;z-index: 99999;}
+#selectSystem{position:fixed;z-index: 9;margin: 20px 15px;}
+#nxt,#prv,#systemList>li,.interfaceListItem,.followed-eye{
+    cursor: pointer;
+}
+.interfaceListItem{
+    overflow: hidden;
+}
+.interfaceUrl{color:#009688;text-decoration: underline}
+.followed-eye{
+    position:absolute;
+    right: 0;
+    bottom: 0;
+    width:60px;
+    font-size: 18px;
+    line-height: 80px;
+    text-align: center;
+}
+.followed{
+    color: #009688!important;
+}
+.blind{
+    color: #b0d2e2;
+}
+
+/*旋转动画*/
+@keyframes rotation {
+    0%{
+        transform: rotate(0deg);
+    }
+    50%{
+        transform: rotate(180deg);
+    }
+    100%{
+        transform: rotate(360deg);
+    }
+}
+.glyphicon-asterisk{
+    animation:rotation 2s infinite linear ;
+}
+
+[v-cloak] {
+    display: none;
+}

@@ -1,0 +1,132 @@
+[v-cloak]{
+  display: none;
+}
+
+#interfaceDetail{
+  position: fixed;
+  overflow-y: scroll;
+  top:60px;
+  left:320px;
+  right: 0;
+  bottom: 0;
+}
+
+
+#interfaceDetail_container,#interfaceDetail_container_editor{
+  position: absolute;
+  top:0;
+  left:0;
+  width:600px;
+  margin-bottom: 50px;
+}
+
+
+.reqBody h5{
+  margin: 0 !important;
+}
+
+#interfaceDetail_container_editor_operations{
+  text-align:right;
+  overflow: visible;
+}
+
+
+
+
+
+
+
+
+/*bootstrap 调整*/
+
+
+
+#editor_invokers_textarea{
+  min-height: 30px;
+  width: 570px;
+  border: 1px solid #ccc;
+  color: #ccc;
+  font-size: 14px;
+  line-height: 14px;
+  border-radius: 4px;
+}
+
+
+.dropdown-menu{
+  border: 1px solid #2cb6bb;
+}
+.switchList{
+  position: absolute;
+  top:36px;
+  width: 300px;
+  display: none;
+}
+.switchList .downMore{
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 10px;
+  border-top: 1px solid #ccc;
+  background: #fff;
+}
+
+
+#debugUrl,#realUrl{display: none;word-break:break-all}
+
+
+
+
+.deleteInterface{
+  position:absolute;
+  display: none;
+  top:8px;
+  right: 8px;
+}
+
+
+.hisEdition {
+  border-bottom: 1px solid #ccc;
+  color: #666666;
+  .version, .time, .username{
+    font-size:12px;
+  }
+  .time{float: right}
+}
+
+.hisEditions{padding: 0}
+.innerShadow{text-shadow:0 2px 0 #fff, 0 -1px 1px #283339, 0 1px 1px #000000!important;}
+.innerShadowhite{    text-shadow:
+        0 -1px 0 #4c6771,
+        0 1px 0 #ffffff,
+        0 1px 1px #155355 !important;}
+.navbar-brand,.navbar-brand:hover{
+  text-decoration: none;
+  color: #fff!important;
+}
+
+
+#btn-deleteIf{
+  opacity: .3;width: 50%;
+  margin-left: 25%;
+  &:hover{
+    opacity: 1;
+    text-decoration: line-through;
+  }
+}
+
+#editor_tag_basicInfo{
+  width: 400px;
+  float: left;
+}
+table th{
+  white-space: nowrap;
+}
+.input-group-addon{font-family: initial}
+.interfaceListItem{
+  float: left;
+  max-width: 74%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+

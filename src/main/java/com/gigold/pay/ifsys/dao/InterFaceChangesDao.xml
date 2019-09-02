@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gigold.pay.ifsys.dao.InterFaceChangesDao">
+
+	<resultMap type="com.gigold.pay.ifsys.bo.InterFaceChanges" id="ifResultMap">
+		<id property="id" column="ID" />
+		<result property="changeType" column="CHANGE_TYPE" />
+		<result property="optionType" column="OPTION_TYPE" />
+		<result property="prmVal" column="PRM_VAL" />
+		<result property="nowVal" column="NOW_VAL" />
+		<result property="userId" column="USER_ID" />
+		<result property="ifId" column="IF_ID" />
+		<result property="ifName" column="IF_NAME" />
+		<result property="userName" column="USERNAME" />
+
+	</resultMap>
+
+	<insert id="recordChanges" parameterType="com.gigold.pay.ifsys.bo.InterFaceChanges">
+		insert into
+			T_IF_CHANGES
+		SET
+			`USER_ID`=#{userId},
+			`IF_ID` = #{ifId},
+			`CHANGE_TYPE`=#{changeType},
+			`OPTION_TYPE`=#{optionType},
+			`PRM_VAL`=#{prmVal},
+			`NOW_VAL`=#{nowVal}
+	</insert>
+
+	<select id="getChangesByIfid" parameterType="int" resultMap="ifResultMap">
+		select
+			ii.IF_NAME,
+			us.USERNAME,
+			cg.USER_ID,
+			cg.IF_ID,
+			cg.CHANGE_TYPE,
+			cg.OPTION_TYPE,
+			cg.PRM_VAL,
+			cg.NOW_VAL,
+			cg.TS
+		from
+			T_IF_CHANGES cg
+			left join T_IF_USER us on cg.`USER_ID`=us.id
+			left join T_IF_INTERFACE ii on cg.IF_ID= ii.id
+		where
+			IF_ID=#{ifId}
+		order by
+			cg.TS desc
+	</select>
+
+	<select id="getRecentChanges" parameterType="int" resultMap="ifResultMap">
+		select
+			ii.IF_NAME,
+			us.USERNAME,
+			cg.USER_ID,
+			cg.IF_ID,
+			cg.CHANGE_TYPE,
+			cg.OPTION_TYPE,
+			cg.PRM_VAL,
+			cg.NOW_VAL,
+			cg.TS
+		from
+			T_IF_CHANGES cg
+			left join T_IF_USER us on cg.`USER_ID`=us.id
+			left join T_IF_INTERFACE ii on cg.IF_ID= ii.id
+		WHERE
+			ii.IF_SYS_ID in (
+				SELECT sys.ID from T_IF_SYSTEM sys where sys.IF_PROJECT_ID IN (
+					SELECT DISTINCT m.PID from T_IF_PROJECT_MEMBER m where m.PID=#{pid} AND m.MID=#{userId}))
+		order by
+			cg.TS desc
+		limit
+			#{limit}
+	</select>
+
+	<select id="getDailyChanges" resultMap="ifResultMap">
+		select
+			ii.IF_NAME,
+			us.USERNAME,
+			cg.USER_ID,
+			cg.IF_ID,
+			cg.CHANGE_TYPE,
+			cg.OPTION_TYPE,
+			cg.PRM_VAL,
+			cg.NOW_VAL,
+			cg.TS
+		from
+			T_IF_CHANGES cg
+			left join T_IF_USER us on cg.`USER_ID`=us.id
+			left join T_IF_INTERFACE ii on cg.IF_ID= ii.id
+		WHERE
+			ii.IF_SYS_ID in (
+				SELECT sys.ID from T_IF_SYSTEM sys where sys.IF_PROJECT_ID =#{pid})
+			AND
+			date(cg.TS) = #{date}
+		order by
+			cg.TS desc
+	</select>
+</mapper>
+ 
+ 
+ 
+ 
+ 
+ 

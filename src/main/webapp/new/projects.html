@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的所有项目</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="./css/3rd/jquery.jsonview.css">
+    <link rel="stylesheet" href="./css/3rd/FreeSearch.css">
+    <link rel="stylesheet" href="./css/css.css?v=4">
+    <link rel="stylesheet" href="./css/defined.css?v=4">
+    <script src="js/3rd/jquery.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/3rd/vue.js"></script>
+    <script src="js/3rd/FreeSearch.js"></script>
+    <style type="text/css">
+        [v-cloak] {
+            display: none;
+        }
+        .thumbnail{
+            border-top: 2px #30babf solid;
+        }
+    </style>
+</head>
+<body>
+<nav id="nav" class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand innerShadowhite" href="main.html">独孤九剑接口管理系统 <span id="loadingTag" class="glyphicon glyphicon-refresh" style="display: none"></span></a>
+        </div>
+    </div><!-- /.container-fluid -->
+</nav>
+<div id="my_projects" class="row" style="margin:55px 0 auto 0;width: 100%">
+        <div id="userBox" class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3><span class="glyphicon glyphicon-sunglasses"></span> 参与的项目:</h3><hr>
+                    <div class="row">
+                        <div v-for="project in projects" v-if="project.asRole<=2" class="col-sm-6 col-md-4">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3>{{project.projectName}}</h3>
+                                    <p>{{project.projectDesc}}</p>
+                                    <p>项目管理员：<a href="mailTo:{{project.master.email}}">{{project.master.userName}}</a></p>
+                                    <p>项目成员：<span v-for="member in project.members"><a href="mailTo:{{member.email}}">{{member.userName}}</a>、</span></p>
+                                    <p><a href="./main.html?PID={{project.id}}" class="btn btn-theme btn-block" role="button">进入项目</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3><span class="glyphicon glyphicon-grain"></span> 管理的项目:</h3><hr>
+                    <div class="row">
+                        <div v-for="project in projects" v-if="project.asRole==0" class="col-sm-6 col-md-4">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3>{{project.projectName}}</h3>
+                                    <p>{{project.projectDesc}}</p>
+                                    <p>项目管理员：<a href="mailTo:{{project.master.email}}">{{project.master.userName}}</a></p>
+                                    <p>项目成员：<span v-for="member in project.members"><a href="mailTo:{{member.email}}">{{member.userName}}</a>、</span></p>
+                                    <p><a href="./main.html?PID={{project.id}}" class="btn btn-theme btn-block" role="button">进入项目</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="projectBox" class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h5><span class="glyphicon glyphicon-sunglasses"></span> 用户信息</h5><hr>
+                    <div>...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+<!-- alert界面提示 -->
+<div class="modal" id="alert" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" style="margin-top: 250px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">{{title}}</h4>
+            </div>
+            <pre class="alertText modal-body">{{message}}</pre>
+            <div class="modal-footer">
+                <button v-if="falseButtonVisible" type="button" class="btn btn-default" @click="falseButton">{{falseButtonText}}</button>
+                <button v-if="trueButtonVisible" type="button" class="btn btn-primary" @click="trueButton">{{trueButtonText}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/api.js?v=4"></script>
+<script src="js/model_projects.js"></script>
+
+<script>
+    $(document).ready(function () {
+//        var _data = {"v":"2.0.0","rspCd":"00000","rspInf":"成功","rspType":"0","dataes":null,"rspData":null,"responseTm":"20170209174259","projectInfo":[{"id":1,"creatorId":0,"masterId":23,"asRole":0,"projectName":"社区半径UAT环境","projectDesc":"全体接口的UAT的测试环境","ts":"2017-02-09 10:53:22.0","state":"1","master":{"id":23,"loginName":"chenkuan","loginPassword":null,"email":"chenkuan@lejiayuan.cn ","userName":"陈宽","phone":null,"qq":null,"position":null,"avtSrc":null},"creator":null,"members":[{"id":2,"loginName":null,"loginPassword":null,"email":"chenzx@lejiayuan.cn","userName":"陈志铉","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":24,"loginName":null,"loginPassword":null,"email":"liuzg@lejiayuan.cn ","userName":"刘治国","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":27,"loginName":null,"loginPassword":null,"email":"dengqy@lejiayuan.cn","userName":"邓清涌","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":29,"loginName":null,"loginPassword":null,"email":"caoquan@lejiayuan.cn","userName":"曹泉","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":32,"loginName":null,"loginPassword":null,"email":"shanxp@lejiayuan.cn","userName":"单小平","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":35,"loginName":null,"loginPassword":null,"email":"zhanglong@lejiayuan.cn","userName":"张龙","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":38,"loginName":null,"loginPassword":null,"email":"chenxin@lejiayuan.cn","userName":"陈鑫","phone":"","qq":"","position":"用户","avtSrc":null,"role":1},{"id":39,"loginName":null,"loginPassword":null,"email":"dengzl@lejiayuan.cn","userName":"邓竹立","phone":"","qq":"","position":"用户","avtSrc":null,"role":1},{"id":40,"loginName":null,"loginPassword":null,"email":"zhangac@lejiayuan.cn","userName":"张爱昌","phone":"","qq":"","position":"用户","avtSrc":null,"role":1},{"id":42,"loginName":null,"loginPassword":null,"email":"chenkuan@lejiayuan.cn","userName":"北京半径管家团队","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":43,"loginName":null,"loginPassword":null,"email":"longfw@sqbj.com","userName":"龙飞舞","phone":"","qq":"","position":"用户","avtSrc":null,"role":1},{"id":23,"loginName":null,"loginPassword":null,"email":"chenkuan@lejiayuan.cn ","userName":"陈宽","phone":null,"qq":null,"position":null,"avtSrc":null,"role":0},{"id":22,"loginName":null,"loginPassword":null,"email":"liyang@lejiayuan.cn","userName":"李杨","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":20,"loginName":null,"loginPassword":null,"email":"zhouwei@lejiayuan.cn","userName":"周伟","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":3,"loginName":null,"loginPassword":null,"email":"chenqh@lejiayuan.cn","userName":"陈清华","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":4,"loginName":null,"loginPassword":null,"email":"luoxy@lejiayuan.cn","userName":"罗翔宇","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":5,"loginName":null,"loginPassword":null,"email":"linfh@lejiayuan.cn","userName":"林飞虎","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":8,"loginName":null,"loginPassword":null,"email":"liubao@sqbj.com","userName":"刘豹","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":10,"loginName":null,"loginPassword":null,"email":"chenhl@lejiayuan.cn","userName":"陈海龙","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":12,"loginName":null,"loginPassword":null,"email":"longfei@lejiayuan.cn","userName":"龙飞","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":14,"loginName":null,"loginPassword":null,"email":"tangmb@lejiayuan.cn","userName":"唐明博 ","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":16,"loginName":null,"loginPassword":null,"email":"mojm@lejiayuan.cn","userName":"莫健敏","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":18,"loginName":null,"loginPassword":null,"email":"chenbo@lejiayuan.cn","userName":"陈博","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":19,"loginName":null,"loginPassword":null,"email":"liwei@lejiayuan.cn","userName":"李伟","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1},{"id":44,"loginName":null,"loginPassword":null,"email":"liaozr@lejiayuan.cn","userName":"廖卓然","phone":"","qq":"","position":"用户","avtSrc":null,"role":1}]},{"id":2,"creatorId":0,"masterId":23,"asRole":0,"projectName":"社区半径SIT环境","projectDesc":"全体接口的SIT测试","ts":"2017-02-09 10:53:23.0","state":"1","master":{"id":23,"loginName":"chenkuan","loginPassword":null,"email":"chenkuan@lejiayuan.cn ","userName":"陈宽","phone":null,"qq":null,"position":null,"avtSrc":null},"creator":null,"members":[{"id":23,"loginName":null,"loginPassword":null,"email":"chenkuan@lejiayuan.cn ","userName":"陈宽","phone":null,"qq":null,"position":null,"avtSrc":null,"role":0}]},{"id":9,"creatorId":0,"masterId":24,"asRole":1,"projectName":"测试","projectDesc":"NULLfdsafdsafasfdas","ts":"2017-02-09 14:32:52.0","state":"1","master":{"id":24,"loginName":"liuzg","loginPassword":null,"email":"liuzg@lejiayuan.cn ","userName":"刘治国","phone":null,"qq":null,"position":null,"avtSrc":null},"creator":null,"members":[{"id":24,"loginName":null,"loginPassword":null,"email":"liuzg@lejiayuan.cn ","userName":"刘治国","phone":null,"qq":null,"position":null,"avtSrc":null,"role":0},{"id":23,"loginName":null,"loginPassword":null,"email":"chenkuan@lejiayuan.cn ","userName":"陈宽","phone":null,"qq":null,"position":null,"avtSrc":null,"role":1}]}],"succeed":true}
+//        console.log(_data)
+//        my_projects.projects = _data["projectInfo"];
+        project_api.post("getAllProjectInfo.do",{},function (data) {
+            my_projects.projects = data["projectInfo"];
+        })
+    })
+</script>
+</html>

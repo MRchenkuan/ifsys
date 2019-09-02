@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gigold.pay.ifsys.dao.InterFaceSystemDao">
+
+	<resultMap type="com.gigold.pay.ifsys.bo.InterFaceSysTem" id="sysResultMap">
+		<id property="id" column="ID" />
+		<result property="sysName" column="IF_SYS_NAME" />
+		<result property="sysDesc" column="IF_SYS_DESC" />
+		<result property="isValid" column="ISVALID" />
+		<result property="addressUrl" column="ADDRESS_URL" />
+		<result property="ifCount" column="IFCOUNT" />
+		<result property="ifProjectId" column="IF_PROJECT_ID" />
+	</resultMap>
+
+	<resultMap type="com.gigold.pay.ifsys.bo.InterFacePro" id="proResultMap">
+		<id property="id" column="ID" />
+		<result property="sysId" column="IF_SYS_ID" />
+		<result property="proName" column="IF_PRO_NAME" />
+		<result property="proDesc" column="IF_PRO_DESC" />
+		<result property="addressUrl" column="ADDRESS_URL" />
+		<result property="isValid" column="ISVALID" />
+	</resultMap>
+
+	<select id="getAllSysInfo" parameterType="int"
+		resultMap="sysResultMap">
+		<![CDATA[  
+        select ID,
+			IF_PROJECT_ID,
+			IF_SYS_NAME,
+			IF_SYS_DESC,
+			ADDRESS_URL
+        from
+			T_IF_SYSTEM
+        where
+			ISVALID='Y' and IF_PROJECT_ID = #{pid}
+        order by
+			`IF_SYS_NAME`
+        ]]>
+
+	</select>
+	<select id="getSysInfoById" parameterType="com.gigold.pay.ifsys.bo.InterFaceSysTem"
+		resultMap="sysResultMap">
+		<![CDATA[  
+         SELECT ID,
+        IF_SYS_NAME,
+        IF_SYS_DESC,
+        ADDRESS_URL,IF_PROJECT_ID
+         FROM T_IF_SYSTEM  
+         where id=#{id} and  ISVALID='Y'
+        ]]>
+	</select>
+
+
+
+
+	<select id="getSysInfoByFollowed" parameterType="int"
+		resultMap="sysResultMap">
+		<![CDATA[
+			SELECT
+				*
+			FROM T_IF_SYSTEM tis left join (SELECT ii.IF_SYS_ID,
+					count(ii.IF_SYS_ID) IFCOUNT
+					 FROM T_IF_INTERFACE ii WHERE ID IN (SELECT iv.IF_FOLLOWED_ID FROM T_IF_INVOKER iv WHERE iv.STATUS='Y' AND iv.U_ID=#{userId}) AND ii.ISVALID='Y' GROUP BY ii.IF_SYS_ID) tif
+			ON
+			tis.id = tif.IF_SYS_ID
+			where tif.IFCOUNT>=0
+			ORDER BY tis.IF_SYS_NAME
+        ]]>
+	</select>
+
+	<select id="getSysInfoByDesigned" parameterType="int"
+		resultMap="sysResultMap">
+		<![CDATA[
+			SELECT
+				*
+			FROM T_IF_SYSTEM tis left join (select
+					ii.IF_SYS_ID,
+					count(ii.IF_SYS_ID) IFCOUNT from T_IF_INTERFACE ii where ii.ISVALID ='Y' AND ii.IF_CREATEBY = #{userId} GROUP BY ii.IF_SYS_ID) tif
+			ON
+			tis.id = tif.IF_SYS_ID
+			where tif.IFCOUNT>=0
+			ORDER BY tis.IF_SYS_NAME
+        ]]>
+	</select>
+
+	<select id="getSysInfoByAllInterface" parameterType="int"
+		resultMap="sysResultMap">
+		<![CDATA[
+			SELECT
+				*
+			FROM T_IF_SYSTEM tis left join (select
+					ii.IF_SYS_ID,
+					count(ii.IF_SYS_ID) IFCOUNT from T_IF_INTERFACE ii where ii.ISVALID ='Y' GROUP BY ii.IF_SYS_ID) tif
+			ON
+			tis.id = tif.IF_SYS_ID
+			where tif.IFCOUNT>=0
+			ORDER BY tis.IF_SYS_NAME
+        ]]>
+	</select>
+
+	<update id="updateInterfaceSys" parameterType="com.gigold.pay.ifsys.bo.InterFaceSysTem">
+			REPLACE INTO
+				T_IF_SYSTEM
+			SET
+				<if test="id!=null and id!=null and id>0">
+				id = #{id},
+				</if>
+				IF_PROJECT_ID = #{ifProjectId},
+				IF_SYS_NAME = #{sysName},
+				IF_SYS_DESC = #{sysDesc}
+	</update>
+
+	<update id="updateInterfacePro" parameterType="com.gigold.pay.ifsys.bo.InterFacePro">
+			REPLACE INTO
+				T_IF_PRO
+			SET
+				<if test="id!=null and id!=null and id>0">
+				id = #{id},
+				</if>
+				IF_SYS_ID = #{sysId},
+				IF_PRO_NAME = #{proName},
+				IF_PRO_DESC = #{proDesc}
+	</update>
+
+</mapper>
+ 
+ 
+ 
+ 
+ 
+ 

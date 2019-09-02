@@ -1,0 +1,10 @@
+.themesColor{color: #25AEB3!important;}
+.normalTextColor{color: #666!important;}
+.thinTextColor,.basicInfo{color: #aaaaaa !important;}
+button{
+    font-family: monospace;
+}
+body{
+    padding: 0;margin: 0;color: #666;font-size: 12px;
+    font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;
+}

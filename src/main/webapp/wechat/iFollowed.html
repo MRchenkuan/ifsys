@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我关注的接口</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
+    <script src="js/3rd/jq.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/3rd/artTemplate.js"></script>
+    <link rel="stylesheet" href="css/css.css?v=7">
+    <script src="js/global_params.js?v=7"></script>
+</head>
+<style>
+    .inlineText{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+    .italicText{
+    text-decoration: underline;
+    font-style: italic;
+    }
+    .basicInfo{
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        margin: 0;
+    }
+</style>
+<body style="color:#25AEB3">
+<div id="information"></div>
+<div id="selectSystem" class="left bottom"></div>
+<div id="interfaceList"></div>
+<div id="interfaceDetail"></div>
+
+<!-- Modal 接口详情 -->
+<div class="modal fade" id="modal_interfaceDetail" tabindex="-1" role="dialog" aria-labelledby="modal_interfaceDetail_title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true"><span class="glyphicon glyphicon-remove-circle"></span></span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="modal_interfaceDetail_title"></h4>
+            </div>
+            <div id="modal_interfaceDetail_content" class="modal-body">
+                <div id="interfaceBaseInfo" class="infoArea"></div>
+                <div id="returnCodeArea" class="infoArea"></div>
+                <div id="reqBody" class="infoArea"></div>
+                <div id="rspBody" class="infoArea"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- 模板部分 -->
+<!-- 接口列表模板-->
+<script id="tpl_interfaceList" type="text/html">
+    <!--// 分页工具 -->
+    <nav class="right bottom" style="position:fixed;z-index: 9; margin:0 15px">
+        <ul class="pager">
+            {{if hasPreviousPage== false}}
+            <li id="prv" class="disabled"><a>前一页</a></li>
+            {{else}}
+            <li id="prv" data-pageNum="{{prePage}}" ><a>前一页</a></li>
+            {{/if}}
+            <li><a>{{pageNum}}/{{pages}}</a></li>
+            {{if hasNextPage== false}}
+            <li id="nxt" class="disabled"><a>后一页</a></li>
+            {{else}}
+            <li id="nxt" data-pageNum="{{nextPage}}"><a >后一页</a></li>
+            {{/if}}
+        </ul>
+    </nav>
+    <!--// 内容页-->
+    <ul class="list-group">
+        {{each list as item i}}
+        <li data-ifId="{{item.id}}" class="list-group-item interfaceListItem" data-toggle="modal" data-target="#modal_interfaceDetail">
+            <p class="list-group-item-heading inlineText">{{item.id}} {{ item.ifName }}</p>
+            <p class="list-group-item-text inlineText"> <code class="interfaceUrl">{{ item.ifUrl }}</code></p>
+            <p class="list-group-item-text inlineText">
+                <small>{{item.designName}} {{item.ifCreateTime}}
+                    {{if item.isIdempotent=="Y"}}
+                    <span class="label label-success">幂等</span>
+                    {{/if}}
+                </small>
+            </p>
+            {{if item.followed == true}}
+                <span data-ifId="{{item.id}}" data-ifName="{{ item.ifName }}" class="glyphicon glyphicon-eye-open followed-eye followed"></span>
+            {{else}}
+                <span data-ifId="{{item.id}}" data-ifName="{{ item.ifName }}" class="glyphicon glyphicon-eye-close followed-eye blind"></span>
+            {{/if}}
+        </li>
+        {{/each}}
+    </ul>
+</script>
+
+<!--选择系统-->
+<script id="tpl_selectSystem" type="text/html">
+    <div class="btn-group dropup">
+        <button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" style="box-shadow: 0 0 15px grey;">
+            <span id="systemSwitchText" class="glyphicon glyphicon-list"></span>
+        </button>
+        <ul id="systemList" class="dropdown-menu" role="menu" style="max-height: 300px;overflow: scroll">
+            {{each sysList as sys i}}
+            <li data-ifSysId="{{sys.id}}" data-ifSysName="{{sys.sysName}}"><a>{{sys.sysName}}<span class="badge right" style="margin: 0 5px">{{sys.ifCount}}</span></a></li>
+            {{/each}}
+        </ul>
+    </div>
+</script>
+
+<!-- 接口基本信息模板 -->
+<script id="tpl_modal_interfaceDetail_title" type="text/html">
+    [{{interFaceInfo.id}}]{{interFaceInfo.ifName}}
+</script>
+<script id="tpl_interfaceBaseInfo" type="text/html">
+    <h4>基本信息</h4>
+    <p class="basicInfo"><label for="designer" class="col-sm-2 control-label"><span class="glyphicon glyphicon-user"></span> 设计者</label><span id="designer">{{interFaceInfo.designName}}</span></p>
+    <p class="basicInfo"><label for="sysName" class="col-sm-2 control-label"><span class="glyphicon glyphicon-th-large"></span> 所属系统</label><span id="sysName">{{interFaceInfo.sysName}}</span></p>
+    <p class="basicInfo"><label for="proName" class="col-sm-2 control-label"><span class="glyphicon glyphicon-th"></span> 所属产品</label><span id="proName">{{interFaceInfo.proName}}</span></p>
+    <p class="basicInfo"><label for="ifType" class="col-sm-2 control-label"><span class="glyphicon glyphicon-globe"></span> 请求方式</label><span id="ifType">{{interFaceInfo.ifType}}</span></p>
+    <p class="basicInfo"><label for="ifProtcol" class="col-sm-2 control-label"><span class="glyphicon glyphicon-transfer"></span> 接口协议</label><span id="ifProtcol">{{interFaceInfo.ifProtocol}}</span></p>
+    <p class="basicInfo"><label for="returnType" class="col-sm-2 control-label"><span class="glyphicon glyphicon-download-alt"></span> 返回类型</label><span id="returnType">{{interFaceInfo.returnType}}</span></p>
+    <p class="basicInfo"><label for="ifVersionNo" class="col-sm-2 control-label"><span class="glyphicon glyphicon-flag"></span> 当前版本</label><span id="ifVersionNo">V{{interFaceInfo.ifVersionNo}}</span></p>
+    <p class="basicInfo"><label for="isIdempotent" class="col-sm-2 control-label"><span class="glyphicon glyphicon-leaf"></span> 幂等性</label><span id="isIdempotent">{{interFaceInfo.isIdempotent=='Y'?"幂等":"非幂等"}}</span></p>
+    <p class="basicInfo"><label for="ifUrl" class="col-sm-2 control-label"><span class="glyphicon glyphicon-link"></span> 路径名</label><span id="ifUrl" data-toggle="tooltip" data-placement="top" title="{{interFaceInfo.ifUrl}}">{{interFaceInfo.ifUrl}}</span></p>
+</script>
+
+<!-- 接口返回码信息模板 -->
+<script id="tpl_returnCodeArea" type="text/html">
+    <h4>返回码定义</h4>
+    {{each rspCodeList as item}}
+    <p class="basicInfo"><label class="col-sm-2 control-label">{{item.rspCode}}</label><span>{{item.rspCodeDesc}}</span></p>
+    {{/each}}
+</script>
+
+<!-- 请求参数模板 -->
+<script id="tpl_reqBody" type="text/html">
+    <h4>请求实例(Request Body):</h4>
+    <pre>{{jsonStr}}</pre>
+</script>
+
+<!-- 响应参数模板 -->
+<script id="tpl_rspBody" type="text/html">
+    <h4>响应实例(Response Body):</h4>
+    <pre>{{jsonStr}}</pre>
+</script><!-- 模板部分结束 -->
+
+<!-- 控制脚本部分 -->
+<script src="js/page_controller.js?v=7"></script>
+<!--<script src="js/debug.js?v=7"></script>-->
+<!-- 控制脚本部分结束 -->
+</body>
+</html>

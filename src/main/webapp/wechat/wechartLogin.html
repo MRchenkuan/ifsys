@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: #FAFAFA;">
+<head>
+    <title>独孤九剑系统</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
+    <script src="js/3rd/jq.js"></script>
+    <script src="js/3rd/vue.js"></script>
+    <script src="js/api.js?v=1"></script>
+    <script src="js/global_params_controller.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <style>
+        .subtext{margin: 30px 0 20px}
+        .inputGroup{padding:0 0 20px;box-shadow:none}
+        .btn-theme{
+            color: #fff!important;
+            background-color: #30babf;
+            text-shadow: 0 1px 0 #666;
+            background-image: -webkit-linear-gradient(top, #30babf 0, #299ea2 100%);
+            background-image: -o-linear-gradient(top, #30babf 0, #299ea2 100%);
+            background-image: -webkit-gradient(linear,left top,left bottom,from(#30babf),to(#299ea2));
+            background-image: linear-gradient(to bottom, #30babf 0,#299ea2 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+            background-repeat: repeat-x;
+            border-color: #24868a;
+            width: 100%;
+        }
+        .list-group-item{width: 100%;}
+        .list-group-item:focus{outline: none}
+        .btn-theme:hover{
+            color: #fff;
+            text-shadow: 0 1px 0 #666;
+            background-color: #30babf;
+            background-image: -webkit-linear-gradient(top, #299ea2 0, #30babf 100%);
+            background-image: -o-linear-gradient(top, #299ea2 0, #30babf 100%);
+            background-image: -webkit-gradient(linear,left top,left bottom,from(#299ea2),to(#30babf));
+            background-image: linear-gradient(to bottom, #299ea2 0, #30babf 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+
+        }
+        .logo{font-size: 68px;
+            text-shadow:0 2px 0 #fff, 0 -1px 1px #283339, 0 1px 1px #000000;
+            color: #25AEB3;
+        }
+        html,body{
+            font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;line-height: 1.7;height: 100%;color:#666}
+        .frame{
+            text-align: center;
+            white-space: nowrap;
+            height: 100%;
+            min-height: 720px;
+            background: #fbffff;
+        }
+        .frame:before{
+            content: '';
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+            margin-right: -.25em;
+        }
+        .loginFrame{
+            padding: 0;
+            display: inline-block;
+            vertical-align: middle;
+            text-align: left;
+            white-space: normal;
+            margin: 0 auto;
+            height: 500px;
+            overflow: hidden;
+            width: 300px;
+            top:0;
+            bottom: 0;
+        }
+        .btn:focus{outline: none}
+        .capture{
+            margin: 0 0 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="frame" class="frame">
+    <div v-if="!canLogin" id="loginFrame" class="loginFrame">
+        <h1 class="logo text-center">
+            IFSYS
+        </h1>
+        <h5 class="subtext text-center"><span class="glyphicon glyphicon-qrcode"></span> 独孤九剑系统:新用户登记</h5>
+
+
+        <div v-if="wxUserInfo" class="input-group input-group">
+            <span class="input-group-addon" id="sizing-addon3" style="background: url('{{wxUserInfo.headimgurl}}');background-size: cover;">&nbsp;</span>
+            <input type="text" placeholder="你的昵称/姓名" class="form-control" value="{{wxUserInfo.nickname}}" v-model="wxUserInfo.nickname">
+        </div>
+        <div class="btn-group btn-group-lg btn-group-justified" style="margin: 1.5rem auto;" role="group">
+            <div class="btn-group btn-group-lg" role="group">
+                <button type="button" class="btn btn-default" @click="switchRole('newUser')">我是新用户</button>
+            </div>
+            <div class="btn-group btn-group-lg" role="group">
+                <button type="button" class="btn btn-warning" @click="switchRole('gidUser')">我是老司机</button>
+            </div>
+        </div>
+        <template v-if="role=='newUser'">
+            <h6 class="text-center"><span class="glyphicon glyphicon-envelope"></span> 所以请为我创建一个新账号</h6>
+            <h6  class="text-danger">{{capSendInfo.newUser}}&nbsp;</h6>
+            <div class="inputGroup input-group">
+                <input v-model="verifyAcct.newUser" type="email" class="form-control" placeholder="请填写用于接收通知的邮箱">
+                <span class="input-group-btn">
+                    <button class="btn btn-default {{timer.newUser>0?'disabled':''}}" type="button" @click="verifyEmail($event)" >{{timeCons.newUser}}</button>
+                </span>
+            </div>
+            <input v-if="captureIsSend.newUser" type="number" v-model="captureValue.newUser" class="form-control capture" placeholder="填写验证码" />
+            <button class="btn btn-theme btn-lg btn-block {{isLogining?'disabled':''}}" @click="doLoginNewUser">绑定邮箱,并且登陆 <span v-if="isLogining" class="glyphicon glyphicon-refresh"></span></button>
+        </template>
+
+        <template v-if="role=='gidUser'">
+            <h6 class="text-center text-danger"><span class="glyphicon glyphicon-star-empty"></span>所以请为我自动关联吉高身份<span class="glyphicon glyphicon-star-empty"></span></h6>
+            <h6 class="text-warning">{{capSendInfo.gidUser}}&nbsp;</h6>
+            <div class="inputGroup input-group">
+                <input v-model="verifyAcct.gidUser" type="email" class="form-control" placeholder="登陆账号/邮箱前缀">
+                <span class="input-group-btn">
+                    <button class="btn btn-default {{timer.gidUser>0?'disabled':''}}" type="button" @click="verifyPhone($event)" >{{timeCons.gidUser}}</button>
+                </span>
+            </div>
+            <input v-if="captureIsSend.gidUser" type="number" v-model="captureValue.gidUser" class="capture form-control" placeholder="填写验证码" />
+            <button class="btn btn-warning btn-lg btn-block {{isLogining?'disabled':''}}" @click="doLoginGidUser">确认身份,并且登陆 <span v-if="isLogining" class="glyphicon glyphicon-refresh"></span></button>
+        </template>
+
+    </div>
+    <div v-if="canLogin" id="registerFrame" class="loginFrame">
+        <h1 class="logo text-center">
+            IFSYS
+        </h1>
+        <h5 style="color:#666" class="subtext text-center"><span class="glyphicon glyphicon-qrcode"></span> 微信登陆独孤九剑接口管理系统</h5>
+        <div class="input-group input-group">
+            <span class="input-group-addon" style="background: url('{{wxUserInfo.headimgurl}}');background-size: cover;">&nbsp;</span>
+            <input type="text" placeholder="你的昵称/姓名" class="form-control" disabled value="{{wxUserInfo.nickname}}" v-model="wxUserInfo.nickname">
+        </div>
+        <p class="subtext text-center">{{information}}</p>
+        <button class="btn btn-theme btn-lg btn-block {{isLogining?'disabled':''}}" @click="doJustLogin">确认登陆 <span v-if="isLogining" class="glyphicon glyphicon-refresh"></span></button>
+    </div>
+
+</div>
+</body>
+</html>
+<script type="text/javascript" charset="UTF-8">
+    var code = GetQueryString("code");
+    var frame = new Vue({
+        el:"#frame",
+        data:{
+            status:"register", //login,
+            role:"",
+            information:null,
+            wxUserInfo:null,
+            sysUserInfo:null,
+            userMail:null,
+            userPhone:null,
+            timeCons:{
+                gidUser:"发送验证码",
+                newUser:"发送验证码"
+            },
+            verifyAcct:{
+                gidUser:"",
+                newUser:""
+            },
+            captureIsSend:{
+                gidUser:false,
+                newUser:false
+            },
+            capSendInfo:{
+                gidUser:"",
+                newUser:""
+            },
+            captureValue:{
+                gidUser:"",
+                newUser:""
+            },
+            canLogin:false, // 是否允许直接登录,
+            timer:{
+                gidUser:0,
+                newUser:0
+            },
+            isLogining:false
+        },
+        methods:{
+            switchRole:function (role) {
+                frame.initMessages()
+                frame.role = role
+            },
+            verifyEmail:function () {
+                frame.initMessages();
+                if(!frame.verifyAcct.newUser)return frame.capSendInfo.newUser="请填写邮箱";
+                frame.captureIsSend.newUser=true;
+
+                // 倒计时
+                var timeout = 45;
+                if(frame.timer.newUser)return;
+                frame.timer.newUser  = setInterval(function () {
+                    if(timeout<=0){
+                        timeout = 45;
+                        frame.timeCons.newUser = "发送验证码";
+                        clearInterval(frame.timer.newUser);
+                        return;
+                    }
+                    frame.timeCons.newUser = timeout-- + " 秒后重试"
+                },1000);
+
+                // 发送验证码
+                api.post("weChat/sendVerifyInformation.do",{
+                    target:frame.verifyAcct.newUser,
+                    type:"email"
+                },function (data) {
+                    if(data['rspCd']=='00000') {
+                        frame.capSendInfo.newUser = "验证码已发送到 " + data['target'];
+                    }else{
+                        frame.capSendInfo.newUser = data['rspInf'] ||'接口响应异常';
+                    }
+                },function (data) {
+                    frame.capSendInfo.newUser = data['rspInf'] ||'接口响应异常';
+                })
+            },
+            verifyPhone:function () {
+                frame.initMessages();
+                if(!frame.verifyAcct.gidUser)return frame.capSendInfo.gidUser="请输入公司邮箱前缀";
+                frame.captureIsSend.gidUser=true;
+
+                // 倒计时
+                frame.capSendInfo.gidUser="已发送验证码到 " + frame.verifyAcct.gidUser;
+                var timeout = 45;
+                if(frame.timer.gidUser)return;
+                frame.timer.gidUser  = setInterval(function () {
+                    if(timeout<=0){
+                        timeout = 45;
+                        frame.timeCons.gidUser = "发送验证码";
+                        clearInterval(frame.timer.gidUser);
+                        return;
+                    }
+                    frame.timeCons.gidUser = timeout-- + " 秒后重试"
+                },1000);
+
+
+                // 发送验证码
+                api.post("weChat/sendVerifyInformation.do",{
+                    target:frame.verifyAcct.gidUser,
+                    type:"gidAcct"
+                },function (data) {
+                    if(data['rspCd']=='00000') {
+                        frame.capSendInfo.gidUser="验证码已发送到 "+data['target'];
+                    }else{
+                        frame.capSendInfo.gidUser = data['rspInf'] || "接口响应异常";
+                    }
+                },function (data) {
+                    frame.capSendInfo.gidUser = data['rspInf'] || "接口响应异常";
+                })
+            },
+
+            doLoginNewUser:function () {
+                frame.initMessages();
+                if(!frame.verifyAcct.newUser)return frame.capSendInfo.newUser="请填写邮箱";
+                if(!frame.captureValue.newUser)return frame.capSendInfo.newUser="验证码未填"
+                frame.isLogining = true;
+
+                // 绑定登陆
+                api.post("weChat/wxLogin.do",{
+                    loginType:"email",
+                    registerEmail:frame.verifyAcct.newUser,
+                    registerEmailCapture:frame.captureValue.newUser
+                },function (data) {
+                    if(data['rspCd']=='00000'){
+                        if(WeixinJSBridge)WeixinJSBridge.call('closeWindow');
+                    }else{
+                        frame.capSendInfo.newUser = data['rspInf'] || "接口响应异常";
+                        frame.isLogining = false;
+                    }
+                },function (data) {
+                    frame.capSendInfo.newUser = data['rspInf'] || "接口响应异常";
+                    frame.isLogining = false;
+                })
+            },
+            doLoginGidUser:function () {
+                frame.initMessages()
+                if(!frame.verifyAcct.gidUser)return frame.capSendInfo.gidUser="请输入公司邮箱前缀";
+                if(!frame.captureValue.gidUser)return frame.capSendInfo.gidUser="验证码未填";
+                frame.isLogining = true;
+                // 绑定登陆
+                api.post("weChat/wxLogin.do",{
+                    loginType:"bindAcct",
+                    bindAcct:frame.verifyAcct.gidUser,
+                    bindAcctCapture:frame.captureValue.gidUser
+                },function (data) {
+                    if(data['rspCd']=='00000'){
+                        if(WeixinJSBridge)WeixinJSBridge.call('closeWindow');
+                    }else{
+                        frame.capSendInfo.gidUser = data['rspInf'] || "接口响应异常";
+                        frame.isLogining = false;
+                    }
+                },function (data) {
+                    frame.capSendInfo.gidUser = data['rspInf'] || "接口响应异常";
+                    frame.isLogining = false;
+                })
+            },
+            doJustLogin:function () {
+                frame.initMessages()
+                frame.isLogining = true;
+                // 绑定登陆
+                api.post("weChat/wxLogin.do",{
+                    loginType:"directly"
+                },function (data) {
+                    if(data['rspCd']=='00000'){
+                        if(WeixinJSBridge)WeixinJSBridge.call('closeWindow');
+                    }else{
+                        frame.information = data['rspInf'] || "接口响应异常";
+                        frame.isLogining = false;
+                    }
+                },function (data) {
+                    frame.information = data['rspInf'] || "接口响应异常";
+                    frame.isLogining = false;
+                })
+            },
+            initMessages:function () {
+                frame.capSendInfo.newUser="";
+                frame.capSendInfo.gidUser="";
+                frame.information="";
+            }
+        }
+    });
+
+//    var _data = {
+//        "v": "2.0.0",
+//        "rspCd": "00000",
+//        "rspInf": "成功",
+//        "rspType": "0",
+//        "dataes": null,
+//        "rspData": null,
+//        "responseTm": "20170208094806",
+//        "wxUserInfo": {
+//            "openid": "ox7bCwsqs_bcifr_vsY3AJmXJEgU",
+//            "nickname": "叫我陈老师",
+//            "sex": "1",
+//            "province": "湖南",
+//            "city": "长沙",
+//            "country": "中国",
+//            "headimgurl": "http://wx.qlogo.cn/mmopen/SlUlDI2xqLaBZaeLtL0YUbKwRR6cDcNyl2o0IHaK7WOd45gfhGrmTUwcM9FgicXCzCVw1y4RCYT4WPNWOpMoVIOKe68Dqvdwm/0",
+//            "unionid": null,
+//            "privilege": []
+//        },
+//        "succeed": false
+//    };
+//    frame.wxUserInfo = _data['wxUserInfo'];
+
+    if(code){
+        api.post("weChat/getWxUserStatus.do",{code:code,ssid:GetQueryString('state')},function (data) {
+            frame.wxUserInfo = data['wxUserInfo'];
+            frame.sysUserInfo = data['sysUserInfo']
+            if(frame.wxUserInfo && frame.sysUserInfo && frame.sysUserInfo.email){
+                frame.canLogin = true;
+            }
+        },function (data) {
+            frame.information = data['rspInfo']
+        })
+    }else{
+        frame.information = "code 获取失败"
+    }
+</script>

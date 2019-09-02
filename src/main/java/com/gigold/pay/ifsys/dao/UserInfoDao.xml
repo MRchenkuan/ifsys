@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gigold.pay.ifsys.dao.UserInfoDao">
+
+	<resultMap type="com.gigold.pay.ifsys.bo.UserInfo" id="userResultMap">
+		<id property="id" column="ID" />
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="loginPassword" column="LOGIN_PASSWORD" />
+		<result property="email" column="EMAIL" />
+		<result property="userName" column="USERNAME" />
+		<result property="phone" column="PHONE" />
+		<result property="qq" column="QQ" />
+		<result property="position" column="POSITION" />
+		<result property="avtSrc" column="AVT_SRC" />
+		<result property="country" column="COUNTRY" />
+		<result property="province" column="PROVINCE" />
+		<result property="city" column="CITY" />
+		<result property="wxOpenId" column="WX_OPENID" />
+		<result property="wxAppId" column="WX_APPID" />
+		<result property="channel" column="CHANNEL" />
+		<result property="registTime" column="TM_SMP" />
+	</resultMap>
+
+	<resultMap type="com.gigold.pay.ifsys.bo.UserInfo" id="userListResultMap">
+		<id property="id" column="ID" />
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="loginPassword" column="LOGIN_PASSWORD" />
+		<result property="email" column="EMAIL" />
+		<result property="userName" column="USERNAME" />
+	</resultMap>
+
+	<resultMap type="HashMap" id="avlUserInfoMap">
+		<id property="id" column="ID" />
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="loginPassword" column="LOGIN_PASSWORD" />
+		<result property="email" column="EMAIL" />
+		<result property="userName" column="USERNAME" />
+		<result property="phone" column="PHONE" />
+		<result property="qq" column="QQ" />
+		<result property="position" column="POSITION" />
+		<result property="avtSrc" column="AVT_SRC" />
+	</resultMap>
+
+
+	<select id="getUser" parameterType="int" resultMap="userResultMap">
+	<![CDATA[  
+		select
+		ID,
+		EMAIL,
+		USERNAME,
+		LOGIN_NAME,
+		PHONE,
+		QQ,
+		`POSITION`,
+		AVT_SRC,
+		COUNTRY,
+		PROVINCE,
+		CITY,
+		TM_SMP,
+		`CHANNEL`
+
+		from T_IF_USER
+		where ID=#{id}
+		 ]]>
+	</select>
+
+	<select id="getUserByLoginKey" parameterType="String" resultMap="userResultMap">
+		<![CDATA[
+		select
+		ID,
+		EMAIL,
+		USERNAME,
+		LOGIN_NAME,
+		PHONE,
+		QQ,
+		POSITION,
+		AVT_SRC
+
+		from
+			T_IF_USER
+		where
+			LOGIN_NAME=#{loginName}
+		AND
+				STATUS='Y'
+		 ]]>
+	</select>
+
+	<select id="getUserByWxOpenId" parameterType="com.gigold.pay.ifsys.bo.UserInfo" resultMap="userResultMap">
+		<![CDATA[
+		select
+			ID,
+			EMAIL,
+			USERNAME,
+			LOGIN_NAME,
+			PHONE,
+			QQ,
+			POSITION,
+			AVT_SRC,
+			WX_OPENID,
+			WX_APPID,
+			`CHANNEL`
+		from
+			T_IF_USER
+		where
+			WX_OPENID=#{wxOpenId} AND WX_APPID=#{wxAppId}
+		 ]]>
+	</select>
+
+	<select id="getUserByEmail" parameterType="String" resultMap="userResultMap">
+		<![CDATA[
+		select
+			ID,
+			EMAIL,
+			USERNAME,
+			LOGIN_NAME,
+			PHONE,
+			QQ,
+			`POSITION`,
+			AVT_SRC,
+			WX_OPENID,
+			WX_APPID,
+			`CHANNEL`
+		from
+			T_IF_USER
+		where
+			EMAIL=#{email}
+		 ]]>
+	</select>
+
+	<select id="getList" resultMap="userListResultMap">
+		select
+		ID,
+		LOGIN_PASSWORD,
+		EMAIL,
+		USERNAME
+		from T_IF_USER
+	</select>
+
+	<select id="searchUsersByKeyWords" parameterType="String" resultMap="userResultMap">
+		select
+		ID,
+		EMAIL,
+		USERNAME,
+		AVT_SRC
+		from T_IF_USER t
+		where t.status="Y" AND t.email LIKE #{key}
+		ORDER BY t.TM_SMP DESC limit 10
+	</select>
+
+
+	<select id="getAvlUserList" resultMap="avlUserInfoMap">
+		select
+		ID,
+		EMAIL,
+		USERNAME
+		from T_IF_USER
+		where STATUS = "Y"
+		ORDER BY EMAIL
+	</select>
+
+	<select id="login" parameterType="com.gigold.pay.ifsys.bo.UserInfo"
+		resultMap="userResultMap">
+		select
+		ID,
+		LOGIN_NAME,
+		EMAIL,
+		USERNAME
+		from
+		T_IF_USER
+		where
+			LOGIN_NAME=#{loginName}
+			and LOGIN_PASSWORD=#{loginPassword}
+			AND `STATUS`="Y"
+			AND `CHANNEL`=1
+	</select>
+
+
+	<insert id="addUser" parameterType="com.gigold.pay.ifsys.bo.UserInfo"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		T_IF_USER(LOGIN_NAME,LOGIN_PASSWORD,EMAIL,USERNAME)
+		values(#{loginName},#{loginPassword},#{email},#{userName})
+	</insert>
+
+	<insert id="createUserWithWeChatOpenId" parameterType="com.gigold.pay.ifsys.bo.UserInfo"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		T_IF_USER(
+			LOGIN_NAME,
+			LOGIN_PASSWORD,
+			EMAIL,
+			USERNAME,
+			AVT_SRC,
+			COUNTRY,PROVINCE,CITY,
+			WX_OPENID,
+			WX_APPID,
+			`CHANNEL`)
+		values(
+			#{loginName},
+			#{loginPassword},
+			#{email},
+			#{userName},
+			#{avtSrc},
+			#{country},#{province},#{city},
+			#{wxOpenId},
+			#{wxAppId},
+			#{channel})
+	</insert>
+
+
+	<update id="updateUserInfo" parameterType="com.gigold.pay.ifsys.bo.UserInfo">
+		UPDATE
+			T_IF_USER
+		<set>
+		<if test="loginPassword != null and loginPassword!=''">
+			LOGIN_PASSWORD = #{loginPassword},
+		</if>
+		<if test="userName != null and userName!=''">
+			USERNAME = #{userName},
+		</if>
+		<if test="avtSrc != null and avtSrc!=''">
+			AVT_SRC = #{avtSrc},
+		</if>
+		<if test="country != null and country!=''">
+			COUNTRY = #{country},
+		</if>
+		<if test="province != null and province!=''">
+			PROVINCE = #{province},
+		</if>
+		<if test="city != null and city!=''">
+			CITY = #{city},
+		</if>
+		<if test="wxOpenId != null and wxOpenId!=''">
+			WX_OPENID = #{wxOpenId},
+		</if>
+		<if test="wxAppId != null and wxAppId!='' ">
+			WX_APPID = #{wxAppId},
+		</if>
+		<if test="channel != null and channel!='' ">
+			`CHANNEL` = #{loginPassword},
+		</if>
+		</set>
+		WHERE
+			ID = #{id}
+	</update>
+
+</mapper>
+ 
+ 
+ 
+ 
+ 
+ 

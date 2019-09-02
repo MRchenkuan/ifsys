@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gigold.pay.ifsys.dao.PrivilegeDao">
+
+
+	<resultMap type="com.gigold.pay.ifsys.bo.PrivilegeInfo" id="Privilege">
+		<id property="id" column="ID" />
+		<result property="privilegeName" column="PRIVILEGE_NAME" />
+		<result property="privilegeDesc" column="PRIVILEGE_DESC" />
+	</resultMap>
+
+	<resultMap type="com.gigold.pay.ifsys.bo.RoleInfo" id="Role">
+		<id property="id" column="ID" />
+		<result property="roleName" column="ROLE_NAME" />
+		<result property="privList" column="PRIVLIST" />
+	</resultMap>
+
+	<select id="getAllRoleByProject" resultMap="Role">
+		SELECT * FROM T_IF_USER_ROLE r WHERE r.id in (
+			SELECT
+				DISTINCT m.ROLE
+			FROM
+				T_IF_PROJECT_MEMBER m
+			WHERE
+				m.MID = #{userId} AND m.PID=#{projectId}
+		)
+	</select>
+
+	<select id="getPrivilegeInfosById" resultMap="Privilege">
+		select * from T_IF_USER_PRIVILEGE where id IN
+			<foreach collection="privs" index="index" item="privId" open="(" separator="," close=")">
+				#{privId}
+			</foreach>
+	</select>
+
+</mapper>
+ 
+ 
+ 
+ 
+ 
+ 

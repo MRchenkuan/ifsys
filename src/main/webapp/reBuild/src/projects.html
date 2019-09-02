@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的所有项目</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="../static/css/3rd/jquery.jsonview.css">
+    <link rel="stylesheet" href="../static/css/3rd/FreeSearch.css">
+    <link rel="stylesheet" href="../static/css/style.css?v=4">
+    <link rel="stylesheet" href="../static/css/defined.css?v=4">
+    <script src="../static/js/3rd/jquery.js"></script>
+    <script src="../static/bootstrap/js/bootstrap.js"></script>
+    <script src="../static/js/3rd/vue.js"></script>
+    <style type="text/css">
+        [v-cloak] {
+            display: none;
+        }
+        .thumbnail{
+            border-top: 2px #30babf solid;
+        }
+        .navbar-default {
+            background-image: linear-gradient(to bottom, #40cbd0 0, #25aeb3 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#40cbd0', endColorstr='#25aeb3', GradientType=0);
+            filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+        }
+        .headImg{
+            width: 30%;
+            border: 1px solid #30babf;
+            border-radius: 5px;
+            margin-right: 4%;
+            float: left;
+        }
+        .userInfo h6,.userInfo h5{
+            text-align: left;
+            font-weight:100;
+        }
+    </style>
+</head>
+<body>
+<nav id="nav" class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand innerShadowhite" href="./projects.html">独孤九剑接口管理系统 <span id="loadingTag" class="glyphicon glyphicon-refresh" style="display: none"></span></a>
+        </div>
+    </div><!-- /.container-fluid -->
+</nav>
+<div id="my_projects" class="row" style="margin:55px 0 auto 0;width: 100%">
+        <div id="userBox" class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3><span class="glyphicon glyphicon-blackboard"></span> 参与的项目:</h3><hr>
+                    <div class="row">
+                        <div v-for="project in projects" v-if="project.asRole==1" class="col-sm-6 col-md-4">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3 style="font-weight: 100">{{project.projectName}}</h3>
+                                    <p>{{project.projectDesc}}</p>
+                                    <p>项目管理员：<a href="mailTo:{{project.master.email}}">{{project.master.userName}}</a></p>
+                                    <p style="line-height: 1">项目成员：<span style="font-weight: 100" v-for="member in project.members"><a href="mailTo:{{member.email}}">{{member.userName}}</a>、</span></p>
+                                    <p><a href="./main.html#/project/{{project.id}}" class="btn btn-theme btn-block" role="button">进入项目</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3><span class="glyphicon glyphicon-tower"></span> 管理的项目:</h3><hr>
+                    <div class="row">
+                        <div v-for="project in projects" v-if="project.asRole==0" class="col-sm-6 col-md-4">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3 style="font-weight: 100">{{project.projectName}}</h3>
+                                    <p>{{project.projectDesc}}</p>
+                                    <p>项目管理员：<a href="mailTo:{{project.master.email}}">{{project.master.userName}}</a></p>
+                                    <p style="line-height: 1">项目成员：<span style="font-weight: 100" v-for="member in project.members"><a href="mailTo:{{member.email}}">{{member.userName}}</a>、</span></p>
+                                    <p><a href="./main.html#/project/{{project.id}}" class="btn btn-theme btn-block" role="button">进入项目</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="projectBox" class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h5><span class="glyphicon glyphicon-baby-formula"></span> 用户信息</h5><hr>
+                    <div class="userInfo">
+                        <div style="overflow:hidden;margin-bottom: 30px">
+                            <img v-if="userInfo.avtSrc" class="headImg" :src="userInfo.avtSrc"/>
+                            <div class="col-md-6" style="padding-left: 0">
+                                <h3>{{userInfo.userName}}</h3>
+                                <h5>{{userInfo.province}}·{{userInfo.city}}</h5>
+                                <h6><span class="glyphicon glyphicon-envelope"></span> {{userInfo.email}}</h6>
+                            </div>
+                        </div>
+                        <h6>注册时间：{{userInfo.registTime.substring(0,19)}}</h6>
+                        <h6  style="margin-bottom: 30px">注册方式：{{channel||'未知'}}</h6>
+                        <h5>有 <span class="badge">{{userInfo.followededCount}}</span> 个人正在关注你设计的接口</h5>
+                        <h5>你设计了 <span class="badge">{{userInfo.createdCount}}</span> 个接口</h5>
+                        <h5>你关注了 <span class="badge">{{userInfo.followedCount}}</span> 个接口</h5>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+<!-- alert界面提示 -->
+<div class="modal" id="alert" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" style="margin-top: 250px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">{{title}}</h4>
+            </div>
+            <pre class="alertText modal-body">{{message}}</pre>
+            <div class="modal-footer">
+                <button v-if="falseButtonVisible" type="button" class="btn btn-default" @click="falseButton">{{falseButtonText}}</button>
+                <button v-if="trueButtonVisible" type="button" class="btn btn-primary" @click="trueButton">{{trueButtonText}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../static/js/api.js?v=4"></script>
+<script src="../static/js/model_projects.js"></script>
+
+<script>
+    $(document).ready(function () {
+        project.post("getAllProjectInfo.do",{},function (data) {
+            my_projects.projects = data["projectInfo"];
+        });
+
+        api.post("whoAmI.do",{},function (data) {
+            my_projects.userInfo = data["userInfo"];
+            console.log(my_projects.userInfo)
+        })
+    })
+</script>
+
+</html>
